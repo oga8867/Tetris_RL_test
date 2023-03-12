@@ -1,0 +1,25 @@
+from nes_py.wrappers import JoypadSpace
+import gym_tetris
+from gym_tetris.actions import MOVEMENT
+from stable_baselines3 import A2C
+from stable_baselines3 import DQN
+from stable_baselines3.common.evaluation import evaluate_policy
+from stable_baselines3.common.monitor import Monitor, load_results
+from stable_baselines3.common.env_util import make_vec_env
+import os
+env = gym_tetris.make('TetrisA-v3')
+env = JoypadSpace(env, MOVEMENT)
+model = A2C.load("models/A2C_tetris/300000.zip")
+
+mean_reward, std_reward = evaluate_policy(model, env, n_eval_episodes=1)
+
+print(f"Mean reward: {mean_reward:.2f} +/- {std_reward:.2f}")
+
+
+done = True
+for step in range(30000):
+    if done:
+        state = env.reset()
+    state, reward, done, info = env.step(env.action_space.sample())
+    env.render()
+env.close()
